@@ -3,6 +3,9 @@
 #include <Windows.h>
 #include <time.h>
 
+int citizen[2] = { 0 }, zombie, mds[3] = { 0 }, villain[2] = { 0 };               // 0 : 위치, 1 : 어그로, 2 : 체력
+int preCitizen[2] = { 0 }, preZombie, preMds[3] = { 0 }, preVillain[2] = { 0 };   // 이전 정보 
+
 //파라미터
 #define LEN_MIN 15     // 기차 길이
 #define LEN_MAX 50
@@ -70,6 +73,17 @@ int mdsPullAggro(int);
  
 
 // 함수 정의
+
+// skipStage
+int intputskipStage() {
+	int skipStageNum;  
+	while (1) {
+		printf("skip stage? (1: yes, 2: no) >> ");
+		scanf_s("%d", &skipStageNum); 
+		if (skipStageNum == 1 || skipStageNum == 2) break; 
+	}
+	return skipStageNum;  
+}
 
 // 인트로
 void intro(void) {
@@ -197,9 +211,9 @@ void printCitizenData(int citizen, int preCitizen, int preCitizenAggro, int Citi
 	else 
 		printf("citizen: stay %d (aggro: %d -> %d)\n", preCitizen, preCitizenAggro, CitizenAggro); 
 }
-void printZombieData(int turn, int zombie, int preZombie, int mdsPullNum) {
+void printZombieData(int zombie, int preZombie, int mdsPullNum, int turn) {
 	if (mdsPullNum == 1) 
-		printf("Zombie  can't move by madongseok\n");
+		printf("Zombie can't move by madongseok\n");
 	else {
 		if (turn % 2 == 1)
 		{
@@ -451,8 +465,6 @@ int main(void) {
 
 	// 변수선언
 	int trainL, percent;										  // 기본정보
-	int citizen[2] = { 0 }, zombie, mds[3] = { 0 };               // 0 : 위치, 1 : 어그로, 2 : 체력
-	int preCitizen[2] = { 0 }, preZombie, preMds[3] = { 0 };      // 이전 정보
 	int infectionNum = 0, mdsMoveNum = 0, mdsPullNum = 0;         // 여부 판단 변수 
 	int turn = 1;					 							  // 턴
 
@@ -478,8 +490,13 @@ int main(void) {
 	printTrain(trainL, citizen[0], zombie, mds[0]);
 	printf("\n\n\n");
 	
+	int skipStageNum = intputskipStage(); 
+
 	//stage 1
 	while (1) {
+		// skipStage
+		if (skipStageNum == 1) break;
+
 		// 턴 출력
 		printf("turn: %d\n", turn);
 
@@ -565,15 +582,14 @@ int main(void) {
 			printProvo(mds[1], preMds[1], mds[2]);
 			break;
 		case ACTION_PULL: 
-			mdsPullNum = mdsPull(percent);
-			mds[1] = mdsPullAggro(mds[1]);
+			mdsPullNum = mdsPull(percent); 
+			mds[1] = mdsPullAggro(mds[1]); 
 			mds[2]--;
 			printPull(mdsPullNum, mds[1], preMds[1], mds[2], preMds[2]);
 		}
-		if (mds[2] <= STM_MIN) { 
+		if (mds[2] <= STM_MIN) 
 			zombieWin();
-			break;
-		}
+
 		preMds[1] = mds[1];
 		preMds[2] = mds[2]; 
 
@@ -581,5 +597,156 @@ int main(void) {
 		turn += 1;
 	}
 
+	// Stage2
+	printStage2(); 
+
+	// 변수 초기화
+	citizen[0] = trainL - 6;
+	villain[0] = trainL - 5;
+	zombie = trainL - 3;
+	mds[0] = trainL - 2;
+
+	preCitizen[0] = citizen[0];
+	preVillain[0] = villain[0];
+	preZombie = zombie;
+	preMds[0] = mds[0];
+	
+	citizen[1] = 0, preCitizen[1] = 0;
+	mds[1] = 0, preMds[1] = 0;
+	mds[2] = STM_MAX, preMds[2] = STM_MAX; 
+
+	turn = 1;
+	skipStageNum = 2;
+	
+	// 초기열차 출력
+	printf("\n\n\n");
+	printTrain2(trainL, citizen[0], zombie, mds[0], villain[0]);
+	printf("\n\n\n");
+
+	// skipStage
+	skipStageNum = intputskipStage(); 
+
+	while (1) {
+		// skipStage
+		if (skipStageNum == 1) break;
+
+		// 이동
+		// 시민이동,어그로
+		citizen[0] = citizenMove(citizen[0], percent);
+		citizen[1] = citizenAggroChange(citizen[1], citizen[0], preCitizen[0]);
+
+		// 빌런이동, 어그로
+		villain[0] = villainMove(villain[0], citizen[0], preCitizen[0]);
+		villain[1] = villainAggroChange(villain[0], preVillain[0], villain[1]);
+
+		// 좀비 이동
+		if (turn % 2 == 1 && mdsPullNum == 0) {
+			zombie = zombieMove(zombie, percent, citizen[0], mds[0], citizen[1], mds[1]);
+		}
+
+		// 턴 출력
+		printf("turn: %d\n", turn);
+
+		// 열차 출력
+		printTrain2(trainL, citizen[0], zombie, mds[0], villain[0]);
+
+		// 시민, 빌런, 좀비 이동현황출력
+		printCitizenData(citizen[0], preCitizen[0], preCitizen[1], citizen[1]);
+		printVillainData(villain[0], preVillain[0], villain[1], preVillain[1]);
+		printZombieData(zombie, preZombie, mdsPullNum, turn);
+		preCitizen[0] = citizen[0];
+		preCitizen[1] = citizen[1];
+		preVillain[0] = villain[0];
+		preVillain[1] = villain[1];
+		preZombie = zombie;
+
+		// pullNum 초기화
+		mdsPullNum = 0;
+
+		// 마동석 이동 입력
+		mdsMoveNum = inputMdsMove(mds[0], zombie);
+		mds[0] = mdsMove(mdsMoveNum, mds[0]);
+		mds[1] = mdsAggroChange(mds[1], mds[0], preMds[0]);
+
+		// 빌런행동 -> <행동> 열차 출력에 반영
+		villain[0] = villainAction(citizen[0], villain[0]);
+		if (villain[0] == citizen[0]) { 
+			if (villain[0] < preVillain[0]) citizen[0]++;
+			else citizen[0]--; 
+		}
+
+		// 열차 출력
+		printTrain2(trainL, citizen[0], zombie, mds[0], villain[0]);
+		printf("\n");
+
+		// 마동석 정보 출력(위치, 어그로 변화가능)
+		printMdsData(mds[0], preMds[0], preMds[1], mds[1], mds[2]);
+		preMds[0] = mds[0];
+		preMds[1] = mds[1];
+
+		// 행동	
+		// 시민행동출력
+		if (citizen[0] != 1) 
+			printf("citizen does nothing.\n");
+
+
+			// 빌런행동 출력
+			printVillainAction(villain[0], preVillain[0], citizen[0], preCitizen[0]);
+			preCitizen[0] = citizen[0];
+			preVillain[0] = villain[0];
+
+			// 시민탈출(빌런의 행동으로 탈출이 가능하기 때문에 빌런행동 출력 다음에 실행)
+			if (citizen[0] == 1) {
+				citizenWin();
+				break;
+			}
+
+			// 마동석 행동
+			// 마동석 행동 입력
+			int mdsActionNum = inputMdsAction(zombie, mds[0]);
+
+			// 마동석 행동, 행동출력
+			switch (mdsActionNum) {
+			case ACTION_REST:
+				mds[1] = mdsRestAggro(mds[1]);
+				mds[2] = mdsRsetStamina(mds[2]);
+				printRest(mds[1], preMds[1], mds[2], preMds[2]);
+				break;
+			case ACTION_PROVOKE:
+				mds[1] = AGGRO_MAX;
+				printProvo(mds[1], preMds[1], mds[2]);
+				break;
+			case ACTION_PULL:
+				mdsPullNum = mdsPull(percent);
+				mds[1] = mdsPullAggro(mds[1]);
+				mds[2]--;
+				printPull(mdsPullNum, mds[1], preMds[1], mds[2], preMds[2]);
+			}
+			if (mds[2] <= STM_MIN)
+				zombieWin();
+
+			preMds[1] = mds[1];
+			preMds[2] = mds[2];
+
+			// 좀비행동
+			infectionNum = zombieAction(zombie, citizen[0], mds[0], citizen[1], mds[1]); 
+			// 좀비 행동에 따른 마동석 체력감소 
+			mds[2] = mdsInfection(infectionNum, mds[2]); 
+			// 좀비 행동 출력 
+			if (infectionNum == 0 || infectionNum == 3) 
+				zombieWin(); 
+			else
+				printzombieAction(infectionNum, mds[2], preMds[2], citizen[1], mds[1]); 
+			printf("\n");
+
+			preMds[2] = mds[2]; 
+
+			// 마동석 좀비에게 사망
+			if (mds[2] <= STM_MIN) 
+				zombieWin(); 
+			
+			// 턴 +1
+			turn += 1;
+	}
 	return 0;
 }
