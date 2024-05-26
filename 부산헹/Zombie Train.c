@@ -28,14 +28,15 @@
 #define ACTION_PULL 2
 
 // stage3,4 시민들 배열
-int citizens[25] = { 0 };			// 시민들 위치
-int preCitizens[25] = { 0 };		// 시민들 이전위치 
-int citizensAggro[25] = { 0 };		// 시민들 어그로
-int preCitizensAggro[25] = { 0 };   // 시민들 이전 어그로
-int zombies[25] = { 0 };			// 좀비들 위치
-int preZombies[25] = { 0 };			// 좀비들 이전위치
+int citizens[LEN_MAX/2] = { 0 };					// 시민들 위치
+int preCitizens[LEN_MAX/2] = { 0 };					// 시민들 이전위치 
+int citizensAggro[LEN_MAX / 2] = { 0 };		        // 시민들 어그로 
+int preCitizensAggro[LEN_MAX / 2] = { 0 };		    // 시민들 이전 어그로 
+int zombies[LEN_MAX / 2] = { 0 };			 		// 좀비들 위치
+int preZombies[LEN_MAX / 2] = { 0 };			 	// 좀비들 이전위치
 
 // 함수선언
+
 // 인트로 아웃트로
 void intro(void);
 void citizenWin(void);
@@ -61,7 +62,7 @@ void printRestAction(int, int, int, int, int);
 void printProvoAction(int, int, int, int);
 void printPullAction(int, int, int, int, int, int);
 void printzombieAction(int infectionNum, int mdsStamina, int preMdsStamina, int citizenAggro, int mdsAggro);
-void printActionPhase1(int citizenActionNum, int zombieActionNum, int cAggro, int mAggro, int mStm, int preMStm);
+void printActionPhase1(int zombieActionNum, int cAggro, int mAggro, int mStm, int preMStm);
 void printActionPhase2(int mPosition, int mActionNum, int mAggro, int preMAggro, int mStm, int preMStm, int mdsPullNum);
 
 // 이동, 어그로
@@ -87,7 +88,6 @@ int zombieAction(int, int, int, int, int);
 void printStage2(void);
 void printTrain2(int trainL, int citizen, int zombie, int madongseok, int villain);
 int villainMove(int villain, int citizen, int precitizen);
-int villainAggroChange(int villain, int previllain, int villainAggro);
 int villainAction(int citizen, int villain);
 int villainAction2(int cPosition, int vPosition, int preVPosition);
 void printVillainMove(int villain, int preVillain, int villainAggro, int preVillainAggro);
@@ -97,7 +97,7 @@ void printSt2ActionPhase1( int zombieActionNum, int cAggro, int mAggro, int mStm
 
 // stage3, 4 공용함수 
 int citizensMoveSt34(int arrLength, int percent);
-int citizensAction34(int escapeNum, int arrLength);
+
 
 // stage3 함수
 void printStage3();
@@ -253,11 +253,11 @@ void printTrain(int trainL, int citizen, int zombie, int madongseok) {
 void printCitizenMove(int citizen, int preCitizen, int preCitizenAggro, int CitizenAggro) {
 	printf("\n");
 	if (citizen != preCitizen && preCitizenAggro != CitizenAggro)
-		printf("citizen: %d -> %d (aggro: %d -> %d)\n", preCitizen, citizen, preCitizenAggro, CitizenAggro);
-	else if (citizen != preCitizen && preCitizenAggro == CitizenAggro) 
-		printf("citizen: %d -> %d (aggro: %d)\n", preCitizen, citizen, CitizenAggro);
+		printf("citizen: %d -> %d (aggro: %d -> %d)\n", preCitizen, citizen, preCitizenAggro, CitizenAggro); 
+	else if (citizen != preCitizen && preCitizenAggro == CitizenAggro)
+		printf("citizen: %d -> %d (aggro: %d(not change))\n", preCitizen, citizen, CitizenAggro);
 	else if (citizen == preCitizen && preCitizenAggro == CitizenAggro) 
-		printf("citizen: stay %d (aggro: %d)\n", citizen, CitizenAggro);  
+		printf("citizen: stay %d (aggro: %d(not change))\n", citizen, CitizenAggro);
 	else
 		printf("citizen: stay %d (aggro: %d -> %d)\n", preCitizen, preCitizenAggro, CitizenAggro);
 }
@@ -265,8 +265,7 @@ void printZombieMove(int zombie, int preZombie, int mdsPullNum, int turn) {
 	if (mdsPullNum == 1)
 		printf("Zombie can't move by madongseok\n");
 	else {
-		if (turn % 2 == 1)
-		{
+		if (turn % 2 == 1) {
 			if (zombie != preZombie)
 				printf("Zombie: %d -> %d\n\n", preZombie, zombie);
 			else
@@ -277,14 +276,14 @@ void printZombieMove(int zombie, int preZombie, int mdsPullNum, int turn) {
 	}
 }
 void printMdsMove(int madongseok, int preMadongseok, int preMdsAggro, int mdsAggro, int mdsStamina) {
-	if (madongseok == preMadongseok && preMdsAggro != mdsAggro)
-		printf("madongseok: stay %d(aggro: %d -> %d, stamina: %d)\n\n", madongseok, preMdsAggro, mdsAggro, mdsStamina);
-	else if (madongseok == preMadongseok && preMdsAggro == mdsAggro)
-		printf("madongseok: stay %d(aggro: %d, stamina: %d)\n\n", madongseok, mdsAggro, mdsStamina);
-	else if (madongseok != preMadongseok && preMdsAggro == mdsAggro) 
-		printf("madongseok: %d -> %d(aggro: %d, stamina: %d)\n\n", preMadongseok, madongseok, mdsAggro, mdsStamina); 
+	if (madongseok != preMadongseok && mdsAggro != preMdsAggro) 
+		printf("madongseok: %d -> %d(aggro: %d -> %d, stamina: %d)\n\n",preMadongseok, madongseok, preMdsAggro, mdsAggro, mdsStamina); 
+	else if (madongseok == preMadongseok && mdsAggro == preMdsAggro)
+		printf("madongseok: stay %d(aggro: %d(not change), stamina: %d)\n\n", madongseok, preMdsAggro, mdsStamina); 
+	else if (madongseok == preMadongseok && mdsAggro != preMdsAggro) 
+		printf("madongseok: stay %d(aggro: %d -> %d, stamina: %d)\n\n", madongseok, preMdsAggro, mdsAggro, mdsStamina);  
 	else
-		printf("madongseok: %d -> %d(aggro: %d -> %d, stamina: %d)\n\n", preMadongseok, madongseok, preMdsAggro, mdsAggro, mdsStamina);
+		printf("madongseok: %d -> %d(aggro: %d(not change), stamina: %d)\n\n", preMadongseok, madongseok, mdsAggro, mdsStamina); 
 }
 void printMovePhase1(int turn, int trainL, int mdsPullNum, int cPosition, int preCPosition, int cAggro, int preCAggro, int zPosition, int perZPosition, int mPosition) {
 	printf("turn: %d\n", turn);
@@ -301,41 +300,61 @@ void printMovePhase2(int trainL, int cPosition, int zPosition, int mPosition, in
 // <행동> 출력
 void printRestAction(int mPosition, int mdsAggro, int preMdsAggro, int mdsStamina, int preMdsStamina) {
 	printf("\nmadongseok rests...\n");
+	if (mdsAggro != preMdsAggro && mdsStamina != preMdsStamina)
 	printf("madongseok: %d (aggro: %d -> %d, stamina: %d -> %d)\n\n", mPosition, preMdsAggro, mdsAggro, preMdsStamina, mdsStamina);
+	else if (mdsAggro != preMdsAggro && mdsStamina == preMdsStamina) 
+		printf("madongseok: %d (aggro: %d -> %d, stamina: %d(not change))\n\n", mPosition, preMdsAggro, mdsAggro, mdsStamina); 
+	else if (mdsAggro == preMdsAggro && mdsStamina != preMdsStamina) 
+		printf("madongseok: %d (aggro: %d(not change), stamina: %d -> %d)\n\n", mPosition, mdsAggro, preMdsStamina, mdsStamina); 
+	else
+		printf("madongseok: %d (aggro: %d(not change), stamina: %d(not change))\n\n", mPosition, mdsAggro, mdsStamina); 
 }
 void printProvoAction(int mPosition, int mdsAggro, int preMdsAggro, int mdsStamina) {
 	printf("\nmadongseok provoked zombie...\n");
-	printf("madongseok: %d (aggro: %d -> %d, stamina: %d)\n\n", mPosition, preMdsAggro, mdsAggro, mdsStamina);
+	if (mdsAggro == preMdsAggro)
+		printf("madongseok: %d (aggro: %d(not change), stamina: %d)\n\n", mPosition, mdsAggro, mdsStamina);
+	else
+		printf("madongseok: %d (aggro: %d -> %d, stamina: %d)\n\n", mPosition, preMdsAggro, mdsAggro, mdsStamina);
 }
 void printPullAction(int mPosition, int mdsPullNum, int mdsAggro, int preMdsAggro, int mdsStamina, int preMdsStamina) {
 	if (mdsPullNum == 0)
 		printf("\nmadongseok failed to pull zombie\n");
 	else
 		printf("\nmadongseok pulled zombie... Next turn, it can't move\n");
-	printf("madongseok: %d (aggro: %d -> %d, stamina: %d -> %d)\n\n", mPosition, preMdsAggro, mdsAggro, preMdsStamina, mdsStamina);
-}
+
+	if (mdsAggro != preMdsAggro) 
+		printf("madongseok: %d (aggro: %d -> %d, stamina: %d -> %d)\n\n", mPosition, preMdsAggro, mdsAggro, preMdsStamina, mdsStamina); 
+	else 
+		printf("madongseok: %d (aggro: %d(not change), stamina: %d -> %d)\n\n", mPosition, mdsAggro, preMdsStamina, mdsStamina); 
+
+} 
 void printzombieAction(int infectionNum, int mdsStamina, int preMdsStamina, int citizenAggro, int mdsAggro) {
 
 	switch (infectionNum) {
-	case 1:
-	case 4:
-		printf("Zomibe attacked madongseok(madongseok stamina: %d -> %d)\n", preMdsStamina, mdsStamina);
+	case 0 :
+		printf("Zomibe attacked citizen.(aggro: %d vs. %d)\n", citizenAggro, mdsAggro);  
+		zombieWin(); 
 		break;
-	case 2:
+	case 3:
+		printf("Zomibe attacked citizen.\n"); 
+		zombieWin();
+		break;
+	case 1:
+	case 2: // 둘다 인접하고 어그로가 같을때는 마동석 공격(ppt 14쪽 참고)
 		printf("Zomibe attacked madongseok(aggro: %d vs. %d, madongseok stamina:  %d -> %d)\n", citizenAggro, mdsAggro, preMdsStamina, mdsStamina);
+		break;
+	case 4:
+		printf("Zomibe attacked madongseok(madongseok stamina: %d -> %d)\n", preMdsStamina, mdsStamina); 
 		break;
 	default:
 		printf("zombie attacked nobody.\n");
 	}
 }
-void printActionPhase1(int citizenActionNum, int zombieActionNum, int cAggro, int mAggro, int mStm, int preMStm) {
-
+void printActionPhase1(int zombieActionNum, int cAggro, int mAggro, int mStm, int preMStm) {
+	// 시민 행동 출력
 	printf("citizen does nothing.\n");
-
-	if (zombieActionNum == 0 || zombieActionNum == 3)
-		zombieWin();
-	else
-		printzombieAction(zombieActionNum, mStm, preMStm, cAggro, mAggro);
+	// 좀비 행동 출력
+	printzombieAction(zombieActionNum, mStm, preMStm, cAggro, mAggro);
 }
 void printActionPhase2(int mPosition, int mActionNum, int mAggro, int preMAggro, int mStm, int preMStm, int mdsPullNum) {
 	switch (mActionNum) {
@@ -372,7 +391,6 @@ int zombieMove(int citizen, int zombie, int percent, int madonseok, int citizenA
 				if(zombie != citizen + 1) 
 					zombie--;  
 			}
-				
 		}
 	}
 	return zombie;
@@ -487,7 +505,7 @@ int zombieAction(int zombie, int citizen, int madongseok, int citizenAggro, int 
 			infectionNum = 0;
 		else if (citizenAggro < mdsAggro)
 			infectionNum = 1;
-		else
+		else	// 둘다 인접하고 어그로가 같을때는 마동석 공격(ppt 14쪽 참고)
 			infectionNum = 2;
 	}
 	else if (citizen == zombie - 1)
@@ -541,20 +559,11 @@ void printTrain2(int trainL, int citizen, int zombie, int madongseok, int villai
 }
 
 int villainMove(int villain, int citizen, int precitizen) {
-	if (citizen != precitizen)
-		villain--;
+	if (villain != -1) {
+		if (citizen != precitizen)
+			villain--;
+	}
 	return villain;
-}
-int villainAggroChange(int villain, int previllain, int villainAggro) {
-	if (villain != previllain) {
-		villainAggro++;
-		if (villainAggro > AGGRO_MAX) villainAggro = AGGRO_MAX;
-	}
-	else {
-		villainAggro--;
-		if (villainAggro < 0) villainAggro = 0;
-	}
-	return villainAggro;
 }
 int villainAction(int citizen, int villain) {
 	if (citizen == villain - 1 || citizen == villain + 1) {
@@ -574,14 +583,16 @@ int villainAction2(int cPosition, int vPosition, int preVPosition) {
 }
 
 void printVillainMove(int villain, int preVillain, int villainAggro, int preVillainAggro) {
-	if (villain != preVillain && villainAggro != preVillainAggro)
-		printf("villain: %d -> %d (aggro: %d -> %d)\n", preVillain, villain, preVillainAggro, villainAggro);
-	else if (villain != preVillain && villainAggro == preVillainAggro)
-		printf("villain: %d -> %d (aggro: %d)\n", preVillain, villain, villainAggro);
-	else if (villain == preVillain && villainAggro == preVillainAggro)
-		printf("villain: stay %d (aggro: %d)\n", villain, villainAggro); 
-	else
-		printf("villain: stay %d (aggro: %d -> %d)\n", villain, preVillainAggro, villainAggro);
+	if (villain != -1) {
+		if (villain != preVillain && villainAggro != preVillainAggro) 
+			printf("villain: %d -> %d (aggro: %d -> %d)\n", preVillain, villain, preVillainAggro, villainAggro);
+		else if (villain != preVillain && villainAggro == preVillainAggro)
+			printf("villain: %d -> %d (aggro: %d(not change))\n", preVillain, villain, villainAggro); 
+		else if (villain == preVillain && villainAggro != preVillainAggro) 
+			printf("villain: stay %d (aggro: %d -> %d)\n", villain, preVillainAggro, villainAggro); 
+		else
+			printf("villain: stay %d (aggro: %d(not change))\n", villain, villainAggro);
+	}
 }
 void printVillainAction(int villain, int preVillain, int citizen, int precitizen) {
 	if (villain != preVillain) {
@@ -603,10 +614,11 @@ void printSt2MovePhase2(int turn, int trainL, int cPosition, int zPosition, int 
 	printMdsMove(mPosition, preMPosition, preMAggro, mAggro, mStm); 
 }
 void printSt2ActionPhase1(int zombieActionNum, int cAggro, int mAggro, int mStm, int preMStm, int vPosition, int preVPosition, int cPosition, int preCPosition) { 
-
+	// 시민 행동
 	printf("citizen does nothing.\n"); 
-
-	printVillainAction(vPosition, preVPosition, cPosition, preCPosition);  
+	// 빌런행동
+	if (vPosition != -1)
+		printVillainAction(vPosition, preVPosition, cPosition, preCPosition);  
 }  
 
 int zombieActionSt2(int zombie, int citizen, int madongseok, int citizenAggro, int mdsAggro, int villain) {
@@ -650,28 +662,6 @@ int citizensMoveSt34(int arrLength, int percent){
 		citizensAggro[i] = citizenAggroChange(citizensAggro[i], citizens[i], preCitizens[i]); 
 	}
 	return 0;
-}
-int citizensAction34(int escapeNum, int arrLength) { 
-	int res = 0;
-	if (citizens[0] == 1) { 
-		printf("citizen%d escaped to the next train.\n", escapeNum);  
-		printf("%dcitizen(s) alive(s).\n", arrLength); 
-		escapeNum--; 
-		for (int i = 0; i <= arrLength; i++) { 
-			citizens[i] = citizens[i + 1]; 
-			preCitizens[i] = preCitizens[i + 1]; 
-		}
-		arrLength--;
-		if (arrLength < 0) arrLength = 0;
-		// 게임종료 
-		//if (citizens[arrLength] == 0)
-
-		res = 1;
-	}
-	else
-		printf("citizen does nothing.\n");
-	 
-	return res; 
 }
 
 // stage3 함수
@@ -746,14 +736,18 @@ void printTrainSt3(int trainL, int zPosition, int mPosition) {
 void printcitizensMove34(int escapeNum, int arrLength) { 
 	int tmp = escapeNum;
 	for (int i = 0; i <= arrLength; i++) { 
-		if (preCitizens[i] == citizens[i]) 
+		if (preCitizens[i] == citizens[i] && citizensAggro[i] == preCitizensAggro[i]) 
+			printf("citizen%d: Stay %d (aggro: %d(not change))\n", tmp, citizens[i], citizensAggro[i]); 
+		else if (preCitizens[i] == citizens[i] && citizensAggro[i] != preCitizensAggro[i])
 			printf("citizen%d: Stay %d (aggro: %d -> %d)\n", tmp, citizens[i], preCitizensAggro[i], citizensAggro[i]); 
+		else if (preCitizens[i] != citizens[i] && citizensAggro[i] == preCitizensAggro[i])  
+			printf("citizen%d: %d -> %d (aggro: %d(not change))\n", tmp, preCitizens[i], citizens[i], citizensAggro[i]);  
 		else
 			printf("citizen%d: %d -> %d (aggro: %d -> %d)\n", tmp, preCitizens[i], citizens[i], preCitizensAggro[i], citizensAggro[i]); 
 		// 변수 갱신
 		preCitizens[i] = citizens[i];
 		preCitizensAggro[i] = citizensAggro[i]; 
-		tmp--;
+		tmp++;
 	}
 } 
 
@@ -769,7 +763,7 @@ void printStage4(void) {
 }
 void citizensTurn0() {
 	// citizens[] 0 으로 초기화 
-	for (int i = 0; i < 25; i++) { 
+	for (int i = 0; i < LEN_MAX/2; i++) {
 		citizens[i] = 0; 
 		citizensAggro[i] = 0; 
 		preCitizensAggro[i] = 0; 
@@ -788,12 +782,12 @@ void printTrainSt4(int trainL,int mPosition, int zArrLength) {
 		if (i == 0 || i == trainL - 1)
 			printf("#");
 		else if (i == zombies[zIndex]) { 
-			printf("Z"); 
+			printf("Z");
 			zIndex++;  
 		}
-		else if (i == mPosition)
+		else if (i == mPosition) 
 			printf("M");
-		else if (i == citizens[cIndex]) {
+		else if (i == citizens[cIndex]) { 
 			printf("C");
 			cIndex++;
 		}
@@ -819,8 +813,6 @@ int zombieMoveSt4(int citizen, int zombie, int percent, int madonseok, int citiz
 					if (zombie != citizen + 1 && zombie != frontZombie + 1)
 					zombie--;
 				}
-				
-
 			}
 		}
 	}
@@ -835,16 +827,16 @@ int zombieMoveSt4(int citizen, int zombie, int percent, int madonseok, int citiz
 				if (zombie != citizen + 1 && zombie != frontZombie + 1)
 					zombie--;
 			}
-
 		}
 	}
+
 	return zombie;
 } 
 int zombiesMoveSt4(int zArrLength, int arrLength, int percent, int mPosition, int mAggro, int turn, int mdsPullNum) {
 	// 좀비 이동
 	int backZombie, frontZombie;
-	for (int i = zArrLength; i <= 24; i++) {
-		if (i == 24)
+	for (int i = zArrLength; i <= LEN_MAX / 2 - 1; i++) {
+		if (i == LEN_MAX/2 -1)
 			backZombie = 0;
 		else
 			backZombie = zombies[i + 1];
@@ -874,28 +866,29 @@ int zombieActionSt4(int zombie, int citizen, int madongseok, int citizenAggro, i
 		infectionNum = 5;
 	return infectionNum;
 }
-
 void printzombiesMoveSt4(int zArrLength, int turn, int mdsPullNum) { 
+	int tmp = 0;
 	// 좀비 이동 출력 
-	for (int i = 24; i >= zArrLength; i--) {
+	for (int i = zArrLength; i <= 24; i++) {
 		if (i == 24) {
 			if (turn % 2 == 0)
-				printf("zombie%d: Stay %d (cannot move)\n", 24 - i, zombies[i]);
+				printf("zombie%d: Stay %d (cannot move)\n", tmp, zombies[i]);
 			else if (mdsPullNum == 1)
 				printf("zombie cannot move byt madongseok.\n");
 			else if (preZombies[i] == zombies[i])
-				printf("zombie%d: Stay %d\n", 24 - i, zombies[i]);
+				printf("zombie%d: Stay %d\n", tmp, zombies[i]);
 			else
-				printf("zombie%d: %d -> %d\n", 24 - i, preZombies[i], zombies[i]);
+				printf("zombie%d: %d -> %d\n", tmp, preZombies[i], zombies[i]);
 		}
 		else {
 			if (preZombies[i] == zombies[i])
-				printf("zombie%d: Stay %d\n", 24 - i, zombies[i]);
+				printf("zombie%d: Stay %d\n",  tmp, zombies[i]);
 			else
-				printf("zombie%d: %d -> %d\n", 24 - i, preZombies[i], zombies[i]);
+				printf("zombie%d: %d -> %d\n", tmp, preZombies[i], zombies[i]);
 		}
 		// 변수 갱신
 		preZombies[i] = zombies[i];
+		tmp++;
 	}
 	printf("\n");
 }
@@ -910,10 +903,25 @@ void printYouWin() {
 	printf("\n");
 }
 
+void printzombieAction34(int infectionNum, int mdsStamina, int preMdsStamina, int citizenAggro, int mdsAggro) {
+
+	switch (infectionNum) {
+	case 1:
+	case 2: // 둘다 인접하고 어그로가 같을때는 마동석 공격(ppt 14쪽 참고)
+		printf("Zomibe attacked madongseok(aggro: %d vs. %d, madongseok stamina:  %d -> %d)\n", citizenAggro, mdsAggro, preMdsStamina, mdsStamina);
+		break;
+	case 4:
+		printf("Zomibe attacked madongseok(madongseok stamina: %d -> %d)\n", preMdsStamina, mdsStamina);
+		break;
+	default:
+		printf("zombie attacked nobody.\n");
+	}
+}
+
+
 int main(void) {
 	// 난수 시드
 	srand((unsigned int)time(NULL));
-
 	// 변수선언
 	int trainL, percent;										          // 기본정보
 	int cPosition, cAggro, preCPosition, preCAggro;                       // 시민정보 (현재, 이전)
@@ -963,6 +971,7 @@ int main(void) {
 
 		// <이동>1(열차, 시민, 좀비 이동현황) 출력
 		printMovePhase1(turn, trainL, mdsPullNum, cPosition, preCPosition, cAggro, preCAggro, zPosition, preZPosition, mPosition);
+
 		// 변수갱신 
 		preCPosition = cPosition;
 		preCAggro = cAggro;
@@ -975,15 +984,15 @@ int main(void) {
 		mAggro = mdsAggroChange(mAggro, mPosition, preMPosition);
 
 		// <이동>2(열차, 마동석 이동현황) 출력
-		printMovePhase2(trainL, cPosition, zPosition, mPosition, preMPosition, mAggro, preMAggro, mStm);
+	    printMovePhase2(trainL, cPosition, zPosition, mPosition, preMPosition, mAggro, preMAggro, mStm);
+
 		// 변수갱신
 		preMPosition = mPosition;
 		preMAggro = mAggro;
 
 		// <행동> Phase
-		
+
 		// 시민 행동
-		citizenActionNum = citizenAction(cPosition);
 		if (cPosition == 1) {
 			citizenWin();
 			break;
@@ -994,7 +1003,7 @@ int main(void) {
 		mStm = mdsInfection(zombieActionNum, mStm);
 
 		// <행동>1(시민, 좀비) 출력
-		printActionPhase1(citizenActionNum, zombieActionNum, cAggro, mAggro, mStm, preMStm);
+		printActionPhase1(zombieActionNum, cAggro, mAggro, mStm, preMStm);
 		// 변수갱신
 		preMStm = mStm;
 		// 마동석 좀비에게 사망	
@@ -1021,6 +1030,7 @@ int main(void) {
 
 		turn++;
 	}
+	
 
 	// Stage2 
 	printStage2();
@@ -1059,6 +1069,7 @@ int main(void) {
 		if (skipStageNum == 1) break;
 
 		// <이동> Phase
+		
 		// 시민이동,어그로
 		cPosition = citizenMove(cPosition, percent);
 		cAggro = citizenAggroChange(cAggro, cPosition, preCPosition);
@@ -1124,16 +1135,14 @@ int main(void) {
 		zombieActionNum = zombieActionSt2(zPosition, cPosition, mPosition, cAggro, mAggro, vPosition); 
 		// 좀비 행동에 따른 마동석 체력감소
 		mStm = mdsInfection(zombieActionNum, mStm);
-
 		// 좀비 <행동> 출력
-		if (zombieActionNum == 0 || zombieActionNum == 3)
-			zombieWin();
-		else if (zombieActionNum == 6) {
-			vPosition = 0;
+		if (zombieActionNum == 6) {
+			vPosition = -1;
 			printf("Zomibe attacked villain.\n");
 		}
 		else
 			printzombieAction(zombieActionNum, mStm, preMStm, cAggro, mAggro);
+
 		// 마동석 좀비에게 사망	 
 		if (mStm <= STM_MIN)
 			zombieWin();
@@ -1142,7 +1151,7 @@ int main(void) {
 		preCPosition = cPosition;
 		preVPosition = vPosition;
 		preMStm = mStm;
-
+		// 턴 + 1
 		turn++;
 	}
 
@@ -1164,12 +1173,16 @@ int main(void) {
 
 	turn = 1;
 
+	// stage 3,4 설명
+	
+	// stage 3,4의  시민들, 좀비들은 앞의 시민 & 좀비가 이동하지 않고 가로막고 있으면 이동할 수 없게 설정하였습니다. 
+
 	// stage3 변수
-	int citizensNum = rand() % (trainL / 4) + ((trainL / 4) - 1);
-	int arrLength = citizensNum;		 // citizens 배열 인덱스 == 시민 수 - 1,  citizens[arrLenth] == 가장 오른쪽 시민의 위치
-	if (arrLength < 0) arrLength *= -1;  
-	int escapeNum = arrLength;			 // 탈출한 시민의 번호 (탈출 출력용)
-	int attackedCitizenNum = -1;         // 공격당한 시민의 번호 (공격 출력용)
+	int citizensNum = rand() % ((trainL / 2) - (trainL / 4) + 1) + ((trainL / 4) - 1);
+	int arrLength = citizensNum;		        // arrLength == 남아있는 시민 수 - 1,  citizens[arrLenth] == 가장 오른쪽 시민의 위치
+	
+	int escapeNum = 0;			                // 탈출한 시민의 번호 (탈출 출력용)
+	int attackedCitizenNum = arrLength;         // 공격당한 시민의 번호 (공격 출력용)
 
 	// citizens 설정
 	citizensSetting(citizensNum, trainL, arrLength, cPosition); 
@@ -1219,8 +1232,8 @@ int main(void) {
 		if (citizens[0] == 1) { 
 			printf("citizen%d escaped to the next train.\n", escapeNum); 
 			printf("%dcitizen(s) alive(s).\n", arrLength); 
-			escapeNum--; 
-			for (int i = 0; i <= arrLength; i++) { 
+			escapeNum++; 
+			for (int i = 0; i <= arrLength; i++) {  // 가장 왼쪽의 시민의 위치가 citizens[0]에 저장 될 수 있도록 배열갱신해줌.
 				citizens[i] = citizens[i + 1]; 
 				preCitizens[i] = preCitizens[i + 1]; 
 			}
@@ -1231,7 +1244,6 @@ int main(void) {
 				citizenWin();
 				break;
 			}
-			
 		}
 		else
 			printf("citizen does nothing.\n"); 
@@ -1242,18 +1254,22 @@ int main(void) {
 		mStm = mdsInfection(zombieActionNum, mStm);
 		// 좀비 행동 출력
 		if (zombieActionNum == 0 || zombieActionNum == 3) {
-			attackedCitizenNum++;
-			printf("citizen%d has been attacked by zombie.\n", attackedCitizenNum);
+			if (zombieActionNum == 0)
+				printf("citizen%d has been attacked by zombie.(aggro: %d vs. %d)\n", attackedCitizenNum, cAggro, mAggro); 
+			else
+				printf("citizen%d has been attacked by zombie.\n", attackedCitizenNum); 
+			
 			printf("%dcitizen(s) alive(s).\n", arrLength);
 			citizens[arrLength] = 0;
 			arrLength--;
+			attackedCitizenNum--;
 			if (arrLength < 0) {
 				arrLength = 0;
 				zombieWin();
 			}
 		}
 		else
-			printzombieAction(zombieActionNum, mStm, preMStm, cAggro, mAggro);
+			printzombieAction34(zombieActionNum, mStm, preMStm, cAggro, mAggro);
 		// 변수갱신
 		preMStm = mStm;
 		// 마동석 좀비에게 사망
@@ -1295,16 +1311,16 @@ int main(void) {
 
 	turn = 1;
 
-	citizensNum = rand() % (trainL / 4) + ((trainL / 4) - 1);
-	arrLength = citizensNum;		// citizens 배열 인덱스 == 시민 수 - 1,  citizens[arrLenth] == 가장 오른쪽 시민의 위치
-	if (arrLength < 0) arrLength *= -1; 
-	escapeNum = arrLength;			// 탈출한 시민의 번호 (탈출 출력용) 
-	attackedCitizenNum = -1;        // 공격당한 시민의 번호 (공격 출력용)
+	citizensNum = rand() % ((trainL / 2) - (trainL / 4) + 1) + ((trainL / 4) - 1); 
+	arrLength = citizensNum;		     	// citizens 배열 인덱스 == 시민 수 - 1,  citizens[arrLenth] == 가장 오른쪽 시민의 위치
+
+	escapeNum = 0;							// 탈출한 시민의 번호 (탈출 출력용) 
+	attackedCitizenNum = arrLength;         // 공격당한 시민의 번호 (공격 출력용)
 	
 
 	// stage 4 변수
-	int zArrLength = 24;			       // zArrLenght == 25 - 좀비 수 zombies[zArrLengh] == 가장 왼쪽 좀비의 위치
-	zombies[zArrLength] = zPosition;       // stage4 에서는 zPostion 사용x, zombie[zArrLength] 로 대체. 
+	int zArrLength = LEN_MAX / 2 - 1;			// zArrLenght == (LEN_MAX/2) - (좀비 수), zombies[zArrLengh] == 가장 왼쪽 좀비의 위치 
+	zombies[zArrLength] = zPosition;			// stage4 에서는 zPostion 사용x, zombie[zArrLength] 로 대체.  zombie[] 은 뒤에서 부터 저장.
 	preZombies[zArrLength] = zPosition;
 	
 
@@ -1345,7 +1361,7 @@ int main(void) {
 		if (citizens[0] == 1) { 
 			printf("citizen%d escaped to the next train.\n", escapeNum); 
 			printf("%dcitizen(s) alive(s).\n", arrLength); 
-			escapeNum--;  
+			escapeNum++;  
 			for (int i = 0; i <= arrLength; i++) { 
 				citizens[i] = citizens[i + 1]; 
 				preCitizens[i] = preCitizens[i + 1];
@@ -1370,22 +1386,26 @@ int main(void) {
 		mStm = mdsInfection(zombieActionNum, mStm); 
 		// 좀비 행동 출력 
 		if (zombieActionNum == 0 || zombieActionNum == 3) { 
-			attackedCitizenNum++; 
-			printf("citizen%d has been attacked by zombie.\n", attackedCitizenNum); 
+			if (zombieActionNum == 0) 
+				printf("citizen%d has been attacked by zombie.(aggro: %d vs. %d)\n", attackedCitizenNum,  cAggro, mAggro); 
+			else
+				printf("citizen%d has been attacked by zombie.\n", attackedCitizenNum); 
+		
 			printf("citizen%d turned into a zombie!\n", attackedCitizenNum);
 			printf("%dcitizen(s) alive(s).\n", arrLength);  
 			zArrLength--;
-			zombies[zArrLength] = citizens[arrLength];
-			preZombies[zArrLength] = citizens[arrLength];
+			zombies[zArrLength] = citizens[arrLength];  // 시민 -> 좀비 변경
+			preZombies[zArrLength] = citizens[arrLength];	
 			citizens[arrLength] = 0; 
 			arrLength--; 
+			attackedCitizenNum--;
 			if (arrLength < 0) {  
 				arrLength = 0; 
 				zombieWin(); 
 			} 
 		}
 		else
-			printzombieAction(zombieActionNum, mStm, preMStm, citizensAggro[arrLength], mAggro);
+			printzombieAction34(zombieActionNum, mStm, preMStm, citizensAggro[arrLength], mAggro); 
 
 		// 변수갱신
 		preMStm = mStm; 
@@ -1393,8 +1413,8 @@ int main(void) {
 		if (mStm <= STM_MIN) 
 			zombieWin(); 
 
-		// 마동석 행동 입력
-		mActionNum = inputMdsAction(zombies[24], mPosition); 
+		// 마동석 행동 입력 
+		mActionNum = inputMdsAction(zombies[LEN_MAX / 2 - 1], mPosition);   
 		// 마동석 행동
 		mAggro = mdsActionAggro(mActionNum, mAggro); 
 		mStm = mdsActionStm(mActionNum, mStm); 
@@ -1405,7 +1425,7 @@ int main(void) {
 		// 마동석 PULL행동으로 인한 사망
 		if (mStm <= STM_MIN) zombieWin(); 
 
-		// 변수갱신 
+		// 변수갱신 0
 		preMAggro = mAggro; 
 		preMStm = mStm; 
 		turn++; 
