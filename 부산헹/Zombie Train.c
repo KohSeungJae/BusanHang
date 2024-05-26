@@ -566,11 +566,12 @@ int villainMove(int villain, int citizen, int precitizen) {
 	return villain;
 }
 int villainAction(int citizen, int villain) {
-	if (citizen == villain - 1 || citizen == villain + 1) {
-		int ran = rand() % 100;
-		if (ran < 30)
-			villain = citizen;
-	}
+
+		if (citizen == villain - 1 || citizen == villain + 1) {
+			int ran = rand() % 100;
+			if (ran < 30)
+				villain = citizen;
+		}
 	return villain;
 } 
 int villainAction2(int cPosition, int vPosition, int preVPosition) {
@@ -956,7 +957,8 @@ int main(void) {
 	printTrain(trainL, cPosition, zPosition, mPosition);
 	printf("\n\n\n");
 
-	int skipStageNum = intputskipStage();
+	int skipStageNum = 2;
+	// skipStageNum = intputskipStage();
 	while (1) {
 		// skipStage
 		if (skipStageNum == 1) break;
@@ -1062,8 +1064,8 @@ int main(void) {
 	printTrain2(trainL, cPosition, zPosition, mPosition, vPosition); 
 	printf("\n\n\n");
 
-	// skipStage
-	skipStageNum = intputskipStage();
+	
+	// skipStageNum = intputskipStage();
 	while (1) {
 		// skipStage
 		if (skipStageNum == 1) break;
@@ -1107,6 +1109,8 @@ int main(void) {
 			break;
 		}
 		// ºô·±Çàµ¿  
+		if (vPosition == 1) // ºô·± Å»Ãâ½Ã À§Ä¡¸¦ -1 ·Î ¼³Á¤
+			vPosition = -1;
 		vPosition = villainAction(cPosition, vPosition);
 		cPosition = villainAction2(cPosition, vPosition, preVPosition);
 
@@ -1191,7 +1195,7 @@ int main(void) {
 	printTrainSt3(trainL, zPosition, mPosition); 
 
 	// skipStage
-	skipStageNum = intputskipStage();
+	// skipStageNum = intputskipStage();
 	while (1) {
 		// skipStage
 		if (skipStageNum == 1) break;
