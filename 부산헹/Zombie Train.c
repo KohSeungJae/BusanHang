@@ -156,7 +156,6 @@ void zombieWin(void) {
 	printf("| | __ |  _  || |\\/| ||  __|  | | | || | | ||  __| |    / \n");
 	printf("| |_\\ \\| | | || |  | || |___  \\ \\_/ /\\ \\_/ /| |___ | |\\ \\ \n");
 	printf(" \\____/\\_| |_/\\_|  |_/\\____/   \\___/  \\___/ \\____/ \\_| \\_|\n");
-	exit(0);
 }
 
 // 입력
@@ -1006,11 +1005,15 @@ int main(void) {
 
 		// <행동>1(시민, 좀비) 출력
 		printActionPhase1(zombieActionNum, cAggro, mAggro, mStm, preMStm);
+		// 좀비 승리
+		if (zombieActionNum == 0 || zombieActionNum == 3) return 0;  
+
 		// 변수갱신
 		preMStm = mStm;
 		// 마동석 좀비에게 사망	
 		if (mStm <= STM_MIN) {
 			zombieWin();
+			return 0;
 		}
 
 		// 마동석 행동 입력
@@ -1025,7 +1028,10 @@ int main(void) {
 		// <행동>2(마동석) 출력
 		printActionPhase2(mPosition, mActionNum, mAggro, preMAggro, mStm, preMStm, mdsPullNum);
 		// 마동석 PULL행동으로 인한 사망
-		if (mStm <= STM_MIN) zombieWin();
+		if (mStm <= STM_MIN) {
+			zombieWin();
+			return 0;
+		}
 		// 변수갱신
 		preMAggro = mAggro;
 		preMStm = mStm;
@@ -1129,7 +1135,10 @@ int main(void) {
 		// <행동>2(마동석) 출력
 		printActionPhase2(mPosition, mActionNum, mAggro, preMAggro, mStm, preMStm, mdsPullNum);
 		// 마동석 PULL행동으로 인한 사망
-		if (mStm <= STM_MIN) zombieWin();
+		if (mStm <= STM_MIN) {
+			zombieWin();
+			return 0;
+		}
 
 		// 변수갱신
 		preMAggro = mAggro;
@@ -1146,10 +1155,14 @@ int main(void) {
 		}
 		else
 			printzombieAction(zombieActionNum, mStm, preMStm, cAggro, mAggro);
-
+		// 좀비 승리
+		if (zombieActionNum == 0 || zombieActionNum == 3) return 0;
+		
 		// 마동석 좀비에게 사망	 
-		if (mStm <= STM_MIN)
+		if (mStm <= STM_MIN) {
 			zombieWin();
+			return 0;
+		}
 
 		// 변수 갱신 
 		preCPosition = cPosition;
@@ -1179,7 +1192,14 @@ int main(void) {
 
 	// stage 3,4 설명
 	
-	// stage 3,4의  시민들, 좀비들은 앞의 시민 & 좀비가 이동하지 않고 가로막고 있으면 이동할 수 없게 설정하였습니다. 
+	// 이동
+	
+	// stage 3,4의  시민들, 좀비들은 앞의 시민 & 좀비가 이동하지 않고 가로막고 있으면 이동할 수 없게 설정하였습니다.
+	
+	// 게임종료
+	
+	// stage 3,4 의 게임 종료 시점은 게임을 진행하다 보면, 게임을 종료하기 위해서는 그 과정이 어떠하든 시민이 1명이 남는 시점이 무조건 존재하게 됩니다. 그때 남은 한명의 시민이 탈출하면, 시민의 승리, 좀비에게 잡히면 좀비의 승리가 되게 설정하였습니다. 
+
 
 	// stage3 변수
 	int citizensNum = rand() % ((trainL / 2) - (trainL / 4) + 1) + ((trainL / 4) - 1);
@@ -1269,17 +1289,22 @@ int main(void) {
 			attackedCitizenNum--;
 			if (arrLength < 0) {
 				arrLength = 0;
-				zombieWin();
+				zombieWin(); 
+				return 0;
 			}
 		}
 		else
 			printzombieAction34(zombieActionNum, mStm, preMStm, cAggro, mAggro);
+		// 좀비 승리
+		if (zombieActionNum == 0 || zombieActionNum == 3) return 0; 
+
 		// 변수갱신
 		preMStm = mStm;
 		// 마동석 좀비에게 사망
-		if (mStm <= STM_MIN)
+		if (mStm <= STM_MIN) {
 			zombieWin();
-
+			return 0;
+		}
 
 		// 마동석 행동 입력
 		mActionNum = inputMdsAction(zPosition, mPosition);
@@ -1291,7 +1316,10 @@ int main(void) {
 		// <행동>2(마동석) 출력
 		printActionPhase2(mPosition, mActionNum, mAggro, preMAggro, mStm, preMStm, mdsPullNum);
 		// 마동석 PULL행동으로 인한 사망
-		if (mStm <= STM_MIN) zombieWin();
+		if (mStm <= STM_MIN) {
+			zombieWin();
+			return 0;
+		}
 
 		// 변수갱신
 		preMAggro = mAggro;
@@ -1406,16 +1434,21 @@ int main(void) {
 			if (arrLength < 0) {  
 				arrLength = 0; 
 				zombieWin(); 
+				return 0;
 			} 
 		}
 		else
 			printzombieAction34(zombieActionNum, mStm, preMStm, citizensAggro[arrLength], mAggro); 
-
+		// 좀비 승리
+		if (zombieActionNum == 0 || zombieActionNum == 3) return 0; 
 		// 변수갱신
 		preMStm = mStm; 
 		// 마동석 좀비에게 사망
-		if (mStm <= STM_MIN) 
-			zombieWin(); 
+		if (mStm <= STM_MIN) {
+			zombieWin();
+			return 0;
+		}
+			
 
 		// 마동석 행동 입력 
 		mActionNum = inputMdsAction(zombies[LEN_MAX / 2 - 1], mPosition);   
@@ -1427,7 +1460,10 @@ int main(void) {
 		// <행동>2(마동석) 출력
 		printActionPhase2(mPosition, mActionNum, mAggro, preMAggro, mStm, preMStm, mdsPullNum); 
 		// 마동석 PULL행동으로 인한 사망
-		if (mStm <= STM_MIN) zombieWin(); 
+		if (mStm <= STM_MIN) {
+			zombieWin();
+			return 0;
+		}
 
 		// 변수갱신 0
 		preMAggro = mAggro; 
