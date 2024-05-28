@@ -3,6 +3,18 @@
 #include <Windows.h>
 #include <time.h>
 
+// 3-4 까지 완료
+
+// stage 3,4 설명
+// 이동
+// stage 3,4의  시민들, 좀비들은 앞의 시민 & 좀비가 이동하지 않고 가로막고 있으면 이동할 수 없게 설정하였습니다.
+// 게임종료
+// 탈출한 시민이 0명이면 좀비의 승리, 탈출한 시민이 1명 이상이면 시민의 승리가 되는것으로 이해하고, 이에맞게 설정하였습니다. 
+// 이후, 스테이지가 종료되면 탈출한 시민의 수와 공격당한 시민의 수를 출력하고 그에따른 승자를 표기하였습니다.
+// 남은 시민 출력
+// 시민이 탈출 했을때, 좀비에게 잡혔을때 모두 (" %dcitizen(s) alive(s).", 기차 칸 안에 남아있는 시민수) 로 출력하였습니다.
+
+
 //파라미터
 #define LEN_MIN 15     // 기차 길이
 #define LEN_MAX 50
@@ -918,6 +930,14 @@ void printzombieAction34(int infectionNum, int mdsStamina, int preMdsStamina, in
 	}
 }
 
+void printGameHistroy(int escNum, int atkNum, int citizensNum) {
+	printf("탈출한 시민 : %d명 , 공격당한 시민 : %d명\n", escNum, citizensNum - atkNum); 
+	if (escNum == 0) {
+		printf("탈출한 시민이 없습니다. 좀비가 승리했습니다.\n");
+	}
+	else
+		printf("%d명의 시민이 탈출했습니다. 시민이 승리했습니다.\n", escNum);
+}
 
 int main(void) {
 	// 난수 시드
@@ -960,7 +980,7 @@ int main(void) {
 	// skipStageNum = intputskipStage();
 	while (1) {
 		// skipStage
-		if (skipStageNum == 1) break; 
+		// if (skipStageNum == 1) break; 
 
 		// <이동> phase
 
@@ -1071,10 +1091,10 @@ int main(void) {
 	printf("\n\n\n");
 
 	
-	// skipStageNum = intputskipStage();
+	// skipStageNum = intputskipStage();  
 	while (1) {
 		// skipStage
-		if (skipStageNum == 1) break;
+		// if (skipStageNum == 1) break;
 
 		// <이동> Phase
 		
@@ -1194,7 +1214,7 @@ int main(void) {
 	// 이동
 	// stage 3,4의  시민들, 좀비들은 앞의 시민 & 좀비가 이동하지 않고 가로막고 있으면 이동할 수 없게 설정하였습니다.
 	// 게임종료
-	// stage 3,4 의 게임 종료 시점은 게임을 진행하다 보면, 게임을 종료하기 위해서는 그 과정이 어떠하든 시민이 1명이 남는 시점이 무조건 존재하게 됩니다. 그때 남은 한명의 시민이 탈출하면, 시민의 승리, 좀비에게 잡히면 좀비의 승리가 되는 것으로 이해하고 그렇게 설정하였습니다. 
+	// 탈출한 시민이 0명이면 좀비의 승리, 탈출한 시민이 1명 이상이면 시민의 승리가 되는것으로 이해하고, 이에맞게 설정하였습니다. 
 	// 남은 시민 출력
 	// 시민이 탈출 했을때, 좀비에게 잡혔을때 모두 (" %dcitizen(s) alive(s).", 기차 칸 안에 남아있는 시민수) 로 출력하였습니다.
 
@@ -1213,10 +1233,10 @@ int main(void) {
 	printTrainSt3(trainL, zPosition, mPosition); 
 
 	// skipStage
-	// skipStageNum = intputskipStage();
+	// skipStageNum = intputskipStage(); 
 	while (1) {
 		// skipStage
-		if (skipStageNum == 1) break;
+		//if (skipStageNum == 1) break;
 
 		// 시민이동,어그로 
 		citizensMoveSt34(arrLength, percent); 
@@ -1263,7 +1283,7 @@ int main(void) {
 			if (arrLength < 0) arrLength = 0; 
 			// 다음스테이지
 			if (citizens[arrLength] == 0) {
-				citizenWin();
+				printGameHistroy(escapeNum, attackedCitizenNum, citizensNum);  
 				break;
 			}
 		}
@@ -1287,14 +1307,19 @@ int main(void) {
 			attackedCitizenNum--;
 			if (arrLength < 0) {
 				arrLength = 0;
-				zombieWin(); 
-				return 0;
+				printGameHistroy(escapeNum, attackedCitizenNum, citizensNum);  
+				if (escapeNum == 0) { // 좀비 승리
+					zombieWin();
+					return 0;
+				  }
+				else { // 시민 승리, 다음 스테이지
+					break;
+				}
 			}
 		}
 		else
 			printzombieAction34(zombieActionNum, mStm, preMStm, cAggro, mAggro);
-		// 좀비 승리
-		if (zombieActionNum == 0 || zombieActionNum == 3) return 0; 
+		
 
 		// 변수갱신
 		preMStm = mStm;
@@ -1402,7 +1427,7 @@ int main(void) {
 			if (arrLength < 0) arrLength = 0; 
 			// 게임종료 
 			if (citizens[arrLength] == 0) { 
-				citizenWin();
+				printGameHistroy(escapeNum, attackedCitizenNum, citizensNum); 
 				printYouWin();
 				break; 
 			}
@@ -1430,15 +1455,20 @@ int main(void) {
 			arrLength--; 
 			attackedCitizenNum--;
 			if (arrLength < 0) {  
-				arrLength = 0; 
-				zombieWin(); 
-				return 0;
+				printGameHistroy(escapeNum, attackedCitizenNum, citizensNum); 
+				if (escapeNum == 0) { // 좀비 승리 
+					zombieWin(); 
+					return 0;
+				}
+				else { // 시민 승리
+					printYouWin(); 
+					return 0;
+				}
 			} 
 		}
 		else
 			printzombieAction34(zombieActionNum, mStm, preMStm, citizensAggro[arrLength], mAggro); 
-		// 좀비 승리
-		if (zombieActionNum == 0 || zombieActionNum == 3) return 0; 
+
 		// 변수갱신
 		preMStm = mStm; 
 		// 마동석 좀비에게 사망
